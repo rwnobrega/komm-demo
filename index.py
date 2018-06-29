@@ -25,8 +25,8 @@ app.layout = html.Div([
     dcc.Location(id='url', refresh=False),
     html.H1('Komm demo', style={'text-align': 'center'}),
     html.Div([
-        html.Div(menu_layout_div, className='two columns', style={'width': '13%'}),
-        html.Div(id='page-content', className='two columns', style={'width': '82%'}),
+        html.Div(menu_layout_div, className='two columns', style={'width': '15%'}),
+        html.Div(id='page-content', className='two columns', style={'width': '80%'}),
     ]),
 ], style={'width': '90%', 'margin': 'auto'})
 
@@ -37,7 +37,12 @@ def display_page(pathname):
     if pathname is None:
         return
     elif pathname == '/':
-        return 'Welcome!'
+        return html.Div([
+            html.H2('Welcome!'),
+            dcc.Markdown('Here you will find interactive demonstrations for **Komm**.'),
+            dcc.Markdown("For installation instructions and source code, please check the project's [development page at GitHub](https://github.com/rwnobrega/komm)."),
+            dcc.Markdown("For library reference, please check the project's [documentation page at Read the Docs](http://komm.readthedocs.io/)."),
+        ])
     elif pathname.startswith('/'):
         app_id = pathname[1:]
         if app_id in app_menu:
