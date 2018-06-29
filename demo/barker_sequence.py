@@ -64,7 +64,7 @@ def barker_sequence_update(length):
                     title='a[n]',
                     dtick=1.0,
                 ),
-            margin={'l': 0, 'b': 60, 't': 80, 'r': 60},
+            margin={'l': 60, 'b': 60, 't': 80, 'r': 60},
             ),
         ),
         style={'display': 'inline-block', 'width': '50%'},
@@ -88,7 +88,7 @@ def barker_sequence_update(length):
                 yaxis=dict(
                     title='R[ℓ]',
                 ),
-                margin={'l': 60, 'b': 60, 't': 80, 'r': 0},
+                margin={'l': 60, 'b': 60, 't': 80, 'r': 60},
             ),
         ),
         style={'display': 'inline-block', 'width': '50%'},

@@ -61,6 +61,7 @@ def lfsr_sequence_update(degree):
                     title='a[n]',
                     dtick=1.0,
                 ),
+            margin={'l': 60, 'b': 60, 't': 80, 'r': 60},
             ),
         ),
         style={'display': 'inline-block', 'width': '50%'},
@@ -84,6 +85,7 @@ def lfsr_sequence_update(degree):
                 yaxis=dict(
                     title='R~[ℓ]',
                 ),
+                margin={'l': 60, 'b': 60, 't': 80, 'r': 60},
             ),
         ),
         style={'display': 'inline-block', 'width': '50%'},
