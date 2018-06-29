@@ -23,7 +23,7 @@ for app_id, app_dict in app_menu.items():
 
 app.layout = html.Div([
     dcc.Location(id='url', refresh=False),
-    html.H1('Komm demo', style={'text-align': 'center'}),
+    html.H1('Komm demo', style={'text-align': 'center', 'padding': '10px', 'background-color': '#EEEEEE'}),
     html.Div([
         html.Div(menu_layout_div, className='two columns', style={'width': '15%'}),
         html.Div(id='page-content', className='two columns', style={'width': '80%'}),
