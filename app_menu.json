@@ -1,0 +1,26 @@
+{
+    "barker_sequence": {
+        "menu_name": "Barker sequence",
+        "title": "Barker sequence",
+        "doc": "http://komm.readthedocs.io/en/latest/komm.BarkerSequence/"
+    },
+
+    "lfsr_sequence": {
+        "menu_name": "LFSR sequence",
+        "title": "Linear-feedback shift register (LFSR) sequence -- Maximum-length sequence (MLS)",
+        "doc": "http://komm.readthedocs.io/en/latest/komm.LFSRSequence/"
+    },
+
+    "walsh_hadamard_sequence": {
+        "menu_name": "Walsh–Hadamard sequence",
+        "title": "Walsh–Hadamard sequence",
+        "doc": "http://komm.readthedocs.io/en/latest/komm.WalshHadamardSequence/"
+    },
+
+    "raised_cosine": {
+        "menu_name": "Raised cosine",
+        "title": "Raised cosine",
+        "doc": "http://komm.readthedocs.io/en/latest/komm.RaisedCosinePulse/"
+    }
+
+}
