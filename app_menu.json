@@ -17,10 +17,15 @@
         "doc": "http://komm.readthedocs.io/en/latest/komm.WalshHadamardSequence/"
     },
 
-    "raised_cosine": {
-        "menu_name": "Raised cosine",
-        "title": "Raised cosine",
+    "raised_cosine_pulse": {
+        "menu_name": "Raised cosine pulse",
+        "title": "Raised cosine pulse",
         "doc": "http://komm.readthedocs.io/en/latest/komm.RaisedCosinePulse/"
-    }
+    },
 
+    "gaussian_pulse": {
+        "menu_name": "Gaussian pulse",
+        "title": "Gaussian pulse",
+        "doc": "http://komm.readthedocs.io/en/latest/komm.GaussianPulse/"
+    }
 }

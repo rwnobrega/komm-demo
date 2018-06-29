@@ -12,12 +12,12 @@ layout = html.Div([
     html.Div([
         html.Div([
             html.P(
-                id=uid('rolloff-label'),
+                id=uid('half-power-bandwidth-label'),
             ),
             dcc.Slider(
-                id=uid('rolloff-slider'),
-                min=0,
-                max=1,
+                id=uid('half-power-bandwidth-slider'),
+                min=0.05,
+                max=1.0,
                 value=0.5,
                 step=0.01,
             )],
@@ -37,22 +37,23 @@ import komm
 import numpy as np
 
 @app.callback(
-    dash.dependencies.Output(component_id=uid('rolloff-label'), component_property='children'),
-    [dash.dependencies.Input(component_id=uid('rolloff-slider'), component_property='value')]
+    dash.dependencies.Output(component_id=uid('half-power-bandwidth-label'), component_property='children'),
+    [dash.dependencies.Input(component_id=uid('half-power-bandwidth-slider'), component_property='value')]
 )
-def _(rolloff):
-    return 'Rolloff: {:.2f}'.format(rolloff)
+def _(half_power_bandwidth):
+    return 'Half-power bandwidth: {:.2f}'.format(half_power_bandwidth)
 
 @app.callback(
     dash.dependencies.Output(component_id=uid('graphs'), component_property='children'),
-    [dash.dependencies.Input(component_id=uid('rolloff-slider'), component_property='value')]
+    [dash.dependencies.Input(component_id=uid('half-power-bandwidth-slider'), component_property='value')]
 )
-def raised_cosine_update(rolloff):
-    pulse = komm.RaisedCosinePulse(rolloff, length_in_symbols=20)
+def gaussian_pulse_update(half_power_bandwidth):
+    Bh = half_power_bandwidth
+    pulse = komm.GaussianPulse(Bh, length_in_symbols=4)
     h = pulse.impulse_response
     H = pulse.frequency_response
-    t = np.linspace(-8.0, 8.0, 800)
-    f = np.linspace(-1.5, 1.5, 150)
+    t = np.linspace(-8.0, 8.0, 1000)
+    f = np.linspace(-4.0, 4.0, 500)
 
     figure_impulse_response = dcc.Graph(
         figure=go.Figure(
@@ -67,16 +68,16 @@ def raised_cosine_update(rolloff):
                 ),
             ],
             layout=go.Layout(
-                title='Raised cosine pulse (waveform)',
+                title='Gaussian pulse (waveform)',
                 xaxis=dict(
                     title='t',
                     range=[-7.1, 7.1],
                 ),
                 yaxis=dict(
                     title='h(t)',
-                    range=[-0.25, 1.25],
+                    range=[-0.1, 1.1],
                 ),
-                margin={'l': 0, 'b': 60, 't': 80, 'r': 60},
+                margin={'l': 60, 'b': 60, 't': 80, 'r': 60},
             ),
         ),
         style={'width': '50%', 'height': '400', 'display': 'inline-block'},
@@ -94,18 +95,27 @@ def raised_cosine_update(rolloff):
                         color='red',
                     ),
                 ),
+                go.Scatter(
+                    x=[-Bh, -Bh, None, Bh, Bh, None, -Bh, Bh],
+                    y=[0, H(0)/np.sqrt(2), None, 0, H(0)/np.sqrt(2), None, H(0)/np.sqrt(2), H(0)/np.sqrt(2)],
+                    mode='lines',
+                    line=dict(
+                        color='gray',
+                        dash='dash',
+                    ),
+                )
             ],
             layout=go.Layout(
-                title='Raised cosine pulse (spectrum)',
+                title='Gaussian pulse (spectrum)',
                 xaxis=dict(
                     title='f',
-                    range=[-1.5, 1.5],
+                    range=[-2.0, 2.0],
                 ),
                 yaxis=dict(
                     title='H(f)',
-                    range=[-0.25, 1.25],
+                    range=[-0.1*H(0), 1.1*H(0)],
                 ),
-                margin={'l': 60, 'b': 60, 't': 80, 'r': 0},
+                margin={'l': 60, 'b': 60, 't': 80, 'r': 60},
             ),
         ),
         style={'width': '50%', 'height': '400', 'display': 'inline-block'},
