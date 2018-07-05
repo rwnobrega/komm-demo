@@ -13,7 +13,7 @@ uid = uid_gen(__name__)
 layout = html.Div([
     html.Div(
         id=uid('graphs'),
-        style={'width': '80%'},
+        style={'width': '78%'},
     ),
 
     html.Div([
@@ -55,7 +55,20 @@ layout = html.Div([
                 step=np.pi/16,
             ),
             html.P(
+                'Labeling:',
                 style={'margin-top': '32px'},
+            ),
+            dcc.Dropdown(
+                id=uid('labeling-dropdown'),
+                options=[
+                    {'label': 'Reflected (Gray)', 'value': 'reflected'},
+                    {'label': 'Natural', 'value': 'natural'},
+                ],
+                value='reflected',
+                clearable=False,
+            ),
+            html.P(
+                style={'margin-top': '16px'},
                 id=uid('noise-power-db-label'),
             ),
             dcc.Slider(
@@ -71,7 +84,7 @@ layout = html.Div([
         style={'width': '20%', 'flex-grow:': '1'},
     ),
 
-], style={'width': '100%', 'display': 'flex'})
+], style={'display': 'flex'})
 
 @app.callback(
     dash.dependencies.Output(component_id=uid('order-label'), component_property='children'),
@@ -86,9 +99,9 @@ def _(log_order):
 )
 def _(log_order):
     marks = {-np.pi: '-π', 0: '0', np.pi: 'π'}
-    M = 2**log_order
-    if M <= 8:
-        marks[np.pi/M] = 'π/{}'.format(M)
+    order = 2**log_order
+    if order <= 8:
+        marks[np.pi/order] = 'π/{}'.format(order)
     return marks
 
 @app.callback(
@@ -117,11 +130,11 @@ def _(noise_power_db):
     [dash.dependencies.Input(component_id=uid('order-slider'), component_property='value'),
      dash.dependencies.Input(component_id=uid('amplitude-slider'), component_property='value'),
      dash.dependencies.Input(component_id=uid('phase-offset-slider'), component_property='value'),
+     dash.dependencies.Input(component_id=uid('labeling-dropdown'), component_property='value'),
      dash.dependencies.Input(component_id=uid('noise-power-db-slider'), component_property='value')]
 )
-def psk_modulation_update(log_order, amplitude, phase_offset, noise_power_db):
+def psk_modulation_update(log_order, amplitude, phase_offset, labeling, noise_power_db):
     order = 2**log_order
-    labeling = 'natural'
     modulation = komm.PSKModulation(order, amplitude, phase_offset, labeling)
     awgn = komm.AWGNChannel()
 
@@ -144,17 +157,19 @@ def psk_modulation_update(log_order, amplitude, phase_offset, noise_power_db):
                     mode='markers',
                     marker=dict(
                         size=2,
-                        color='rgba(0, 0, 255, 0.5)',
+                        color='rgba(0, 0, 255, 0.33)',
                     ),
                 ),
                 go.Scatter(
                     name='Constellation',
                     x=np.real(modulation.constellation),
                     y=np.imag(modulation.constellation),
-                    mode='markers',
+                    mode='markers+text',
                     marker=dict(
                         color='red',
                     ),
+                    text=[''.join(str(b) for b in komm.util.int2binlist(modulation.labeling[i], width=modulation.bits_per_symbol)) for i in range(order)],
+                    textposition='top center',
                 ),
             ],
             layout=go.Layout(
