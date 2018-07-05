@@ -27,5 +27,12 @@
         "menu_name": "Gaussian pulse",
         "title": "Gaussian pulse",
         "doc": "http://komm.readthedocs.io/en/latest/komm.GaussianPulse/"
+    },
+
+    "psk_modulation": {
+        "menu_name": "PSK modulation",
+        "title": "PSK modulation",
+        "doc": "http://komm.readthedocs.io/en/latest/komm.PSKModulation/"
     }
+
 }
