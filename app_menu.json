@@ -33,6 +33,13 @@
         "menu_name": "PSK modulation",
         "title": "PSK modulation",
         "doc": "http://komm.readthedocs.io/en/latest/komm.PSKModulation/"
+    },
+
+    "qam_modulation": {
+        "menu_name": "QAM modulation",
+        "title": "Quadrature amplitude modulation (QAM)",
+        "doc": "http://komm.readthedocs.io/en/latest/komm.QAModulation/"
     }
+
 
 }

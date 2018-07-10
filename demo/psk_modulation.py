@@ -23,7 +23,7 @@ layout = html.Div([
                 id=uid('order-label'),
             ),
             dcc.Slider(
-                id=uid('order-slider'),
+                id=uid('log-order-slider'),
                 min=1,
                 max=4,
                 value=1,
@@ -88,14 +88,14 @@ layout = html.Div([
 
 @app.callback(
     dash.dependencies.Output(component_id=uid('order-label'), component_property='children'),
-    [dash.dependencies.Input(component_id=uid('order-slider'), component_property='value')]
+    [dash.dependencies.Input(component_id=uid('log-order-slider'), component_property='value')]
 )
 def _(log_order):
     return 'Order: {}'.format(2**log_order)
 
 @app.callback(
     dash.dependencies.Output(component_id=uid('phase-offset-slider'), component_property='marks'),
-    [dash.dependencies.Input(component_id=uid('order-slider'), component_property='value')]
+    [dash.dependencies.Input(component_id=uid('log-order-slider'), component_property='value')]
 )
 def _(log_order):
     marks = {-np.pi: '-π', 0: '0', np.pi: 'π'}
@@ -127,7 +127,7 @@ def _(noise_power_db):
 
 @app.callback(
     dash.dependencies.Output(component_id=uid('graphs'), component_property='children'),
-    [dash.dependencies.Input(component_id=uid('order-slider'), component_property='value'),
+    [dash.dependencies.Input(component_id=uid('log-order-slider'), component_property='value'),
      dash.dependencies.Input(component_id=uid('amplitude-slider'), component_property='value'),
      dash.dependencies.Input(component_id=uid('phase-offset-slider'), component_property='value'),
      dash.dependencies.Input(component_id=uid('labeling-dropdown'), component_property='value'),
@@ -155,21 +155,23 @@ def psk_modulation_update(log_order, amplitude, phase_offset, labeling, noise_po
                     x=np.real(recvword),
                     y=np.imag(recvword),
                     mode='markers',
-                    marker=dict(
-                        size=2,
-                        color='rgba(0, 0, 255, 0.33)',
-                    ),
+                    marker={'size': 2, 'color': 'rgba(0, 0, 255, 0.33)'},
                 ),
                 go.Scatter(
                     name='Constellation',
                     x=np.real(modulation.constellation),
                     y=np.imag(modulation.constellation),
-                    mode='markers+text',
-                    marker=dict(
-                        color='red',
-                    ),
+                    mode='markers',
+                    marker={'color': 'red'},
+                ),
+                go.Scatter(
+                    name='Labeling',
+                    x=np.real(modulation.constellation),
+                    y=np.imag(modulation.constellation) + 0.25,
+                    mode='text',
                     text=[''.join(str(b) for b in komm.util.int2binlist(modulation.labeling[i], width=modulation.bits_per_symbol)) for i in range(order)],
                     textposition='top center',
+                    textfont = {'size': 10},
                 ),
             ],
             layout=go.Layout(
