@@ -1,6 +1,6 @@
-import dash
 import dash_core_components as dcc
 import dash_html_components as html
+from dash.dependencies import Input, Output
 import plotly.graph_objs as go
 
 import komm
@@ -87,15 +87,15 @@ layout = html.Div([
 ], style={'display': 'flex'})
 
 @app.callback(
-    dash.dependencies.Output(component_id=uid('order-label'), component_property='children'),
-    [dash.dependencies.Input(component_id=uid('log-order-slider'), component_property='value')]
+    Output(component_id=uid('order-label'), component_property='children'),
+    [Input(component_id=uid('log-order-slider'), component_property='value')]
 )
 def _(log_order):
     return 'Order: {}'.format(2**log_order)
 
 @app.callback(
-    dash.dependencies.Output(component_id=uid('phase-offset-slider'), component_property='marks'),
-    [dash.dependencies.Input(component_id=uid('log-order-slider'), component_property='value')]
+    Output(component_id=uid('phase-offset-slider'), component_property='marks'),
+    [Input(component_id=uid('log-order-slider'), component_property='value')]
 )
 def _(log_order):
     marks = {-np.pi: '-π', 0: '0', np.pi: 'π'}
@@ -105,33 +105,33 @@ def _(log_order):
     return marks
 
 @app.callback(
-    dash.dependencies.Output(component_id=uid('amplitude-label'), component_property='children'),
-    [dash.dependencies.Input(component_id=uid('amplitude-slider'), component_property='value')]
+    Output(component_id=uid('amplitude-label'), component_property='children'),
+    [Input(component_id=uid('amplitude-slider'), component_property='value')]
 )
 def _(amplitude):
     return 'Amplitude: {:.2f}'.format(amplitude)
 
 @app.callback(
-    dash.dependencies.Output(component_id=uid('phase-offset-label'), component_property='children'),
-    [dash.dependencies.Input(component_id=uid('phase-offset-slider'), component_property='value')]
+    Output(component_id=uid('phase-offset-label'), component_property='children'),
+    [Input(component_id=uid('phase-offset-slider'), component_property='value')]
 )
 def _(phase_offset):
     return 'Phase offset: {:.2f}'.format(phase_offset)
 
 @app.callback(
-    dash.dependencies.Output(component_id=uid('noise-power-db-label'), component_property='children'),
-    [dash.dependencies.Input(component_id=uid('noise-power-db-slider'), component_property='value')]
+    Output(component_id=uid('noise-power-db-label'), component_property='children'),
+    [Input(component_id=uid('noise-power-db-slider'), component_property='value')]
 )
 def _(noise_power_db):
     return 'Noise power: {:.2f} dB'.format(noise_power_db)
 
 @app.callback(
-    dash.dependencies.Output(component_id=uid('graphs'), component_property='children'),
-    [dash.dependencies.Input(component_id=uid('log-order-slider'), component_property='value'),
-     dash.dependencies.Input(component_id=uid('amplitude-slider'), component_property='value'),
-     dash.dependencies.Input(component_id=uid('phase-offset-slider'), component_property='value'),
-     dash.dependencies.Input(component_id=uid('labeling-dropdown'), component_property='value'),
-     dash.dependencies.Input(component_id=uid('noise-power-db-slider'), component_property='value')]
+    Output(component_id=uid('graphs'), component_property='children'),
+    [Input(component_id=uid('log-order-slider'), component_property='value'),
+     Input(component_id=uid('amplitude-slider'), component_property='value'),
+     Input(component_id=uid('phase-offset-slider'), component_property='value'),
+     Input(component_id=uid('labeling-dropdown'), component_property='value'),
+     Input(component_id=uid('noise-power-db-slider'), component_property='value')]
 )
 def psk_modulation_update(log_order, amplitude, phase_offset, labeling, noise_power_db):
     order = 2**log_order

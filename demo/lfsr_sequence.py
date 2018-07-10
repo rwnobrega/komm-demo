@@ -1,7 +1,6 @@
-import dash
 import dash_core_components as dcc
 import dash_html_components as html
-
+from dash.dependencies import Input, Output
 import plotly.graph_objs as go
 
 from app import app, uid_gen
@@ -35,8 +34,8 @@ import numpy as np
 
 
 @app.callback(
-    dash.dependencies.Output(component_id=uid('graphs'), component_property='children'),
-    [dash.dependencies.Input(component_id=uid('degree-slider'), component_property='value')]
+    Output(component_id=uid('graphs'), component_property='children'),
+    [Input(component_id=uid('degree-slider'), component_property='value')]
 )
 def lfsr_sequence_update(degree):
     lfsr = komm.LFSRSequence.maximum_length_sequence(degree=degree)

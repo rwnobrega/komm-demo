@@ -1,7 +1,6 @@
-import dash
 import dash_core_components as dcc
 import dash_html_components as html
-
+from dash.dependencies import Input, Output
 import plotly.graph_objs as go
 
 from app import app, uid_gen
@@ -62,15 +61,15 @@ import komm
 import numpy as np
 
 @app.callback(
-    dash.dependencies.Output(component_id=uid('index-slider'), component_property='max'),
-    [dash.dependencies.Input(component_id=uid('length-slider'), component_property='value')]
+    Output(component_id=uid('index-slider'), component_property='max'),
+    [Input(component_id=uid('length-slider'), component_property='value')]
 )
 def _(log_length):
     return 2**log_length - 1
 
 @app.callback(
-    dash.dependencies.Output(component_id=uid('index-slider'), component_property='marks'),
-    [dash.dependencies.Input(component_id=uid('length-slider'), component_property='value')]
+    Output(component_id=uid('index-slider'), component_property='marks'),
+    [Input(component_id=uid('length-slider'), component_property='value')]
 )
 def _(log_length):
     marks = {i: '' for i in range(2**log_length)}
@@ -79,10 +78,10 @@ def _(log_length):
     return marks
 
 @app.callback(
-    dash.dependencies.Output(component_id=uid('graphs'), component_property='children'),
-    [dash.dependencies.Input(component_id=uid('length-slider'), component_property='value'),
-     dash.dependencies.Input(component_id=uid('ordering-radio'), component_property='value'),
-     dash.dependencies.Input(component_id=uid('index-slider'), component_property='value')]
+    Output(component_id=uid('graphs'), component_property='children'),
+    [Input(component_id=uid('length-slider'), component_property='value'),
+     Input(component_id=uid('ordering-radio'), component_property='value'),
+     Input(component_id=uid('index-slider'), component_property='value')]
 )
 def barker_sequence_update(log_length, ordering, index):
     length = 2**log_length
