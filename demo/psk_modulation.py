@@ -195,6 +195,4 @@ def psk_modulation_update(log_order, amplitude, phase_offset, labeling, noise_po
 
     figure.layout.update(relayoutData)
 
-    print(figure.layout)
-
     return figure
