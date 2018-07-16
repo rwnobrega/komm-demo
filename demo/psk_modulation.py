@@ -185,16 +185,10 @@ def psk_modulation_update(log_order, amplitude, phase_offset, labeling, noise_po
         noise_power_db=noise_power_db)
 
     old_layout = figure['layout'] if figure else None
+    old_data = figure['data'] if figure else None
 
     figure = go.Figure(
         data=[
-            go.Scatter(
-                name='Gaussian clouds',
-                x=np.real(psk_demo.output['gaussian_clouds']),
-                y=np.imag(psk_demo.output['gaussian_clouds']),
-                mode='markers',
-                marker={'size': 2, 'color': 'rgba(0, 0, 255, 0.33)'},
-            ),
             go.Scatter(
                 name='Constellation',
                 x=np.real(psk_demo.output['constellation']),
@@ -204,6 +198,15 @@ def psk_modulation_update(log_order, amplitude, phase_offset, labeling, noise_po
                 textposition='top center',
                 marker={'color': 'red'},
                 textfont = {'size': 10},
+                visible=True,
+            ),
+            go.Scatter(
+                name='Gaussian clouds',
+                x=np.real(psk_demo.output['gaussian_clouds']),
+                y=np.imag(psk_demo.output['gaussian_clouds']),
+                mode='markers',
+                marker={'size': 2, 'color': 'rgba(0, 0, 255, 0.2)'},
+                visible='legendonly',
             ),
         ],
 
@@ -218,7 +221,6 @@ def psk_modulation_update(log_order, amplitude, phase_offset, labeling, noise_po
                 range=(-2.1, 2.1),
                 scaleanchor = 'x',
             ),
-            margin={'l': 60, 'b': 60, 't': 80, 'r': 60},
             hovermode='closest',
         ),
     )
@@ -230,5 +232,9 @@ def psk_modulation_update(log_order, amplitude, phase_offset, labeling, noise_po
         if figure['layout'][axis]['autorange']:
             figure['layout'][axis]['autorange'] = False
             figure['layout'][axis]['range'] = (-2.1, 2.1)
+
+    if old_data:
+        for i, trace in enumerate(old_data):
+            figure['data'][i]['visible'] = trace['visible']
 
     return figure
