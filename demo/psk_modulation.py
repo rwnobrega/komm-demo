@@ -19,10 +19,6 @@ layout = html.Div([
     ),
 
     html.Div([
-        html.Div(
-            html.Button('Reset axes', id=uid('reset-button')),
-            style={'text-align': 'center'},
-        ),
         html.P(
             style={'margin-top': '32px'},
             id=uid('order-label'),
@@ -130,17 +126,6 @@ def _(noise_power_db):
     return 'Noise power: {:.2f} dB'.format(noise_power_db)
 
 @app.callback(
-    Output(component_id=uid('constellation-graph'), component_property='relayoutData'),
-    [Input(component_id=uid('reset-button'), component_property='n_clicks')]
-)
-def _(n_clicks):
-    layout=go.Layout(
-        xaxis={'range': (-2.1, 2.1)},
-        yaxis={'range': (-2.1, 2.1)},
-    )
-    return layout
-
-@app.callback(
     Output(component_id=uid('constellation-graph'), component_property='figure'),
     [Input(component_id=uid('log-order-slider'), component_property='value'),
      Input(component_id=uid('amplitude-slider'), component_property='value'),
@@ -200,6 +185,16 @@ def psk_modulation_update(log_order, amplitude, phase_offset, labeling, noise_po
         ),
     )
 
-    figure.layout.update(explode_dict(relayoutData))
+    relayoutData = explode_dict(relayoutData)
+
+    if relayoutData.get('xaxis', {}).pop('autorange', False):
+        relayoutData['xaxis']['range'] = (-2.1, 2.1)
+
+    if relayoutData.get('yaxis', {}).pop('autorange', False):
+        relayoutData['yaxis']['range'] = (-2.1, 2.1)
+
+    figure.layout.update(relayoutData)
+
+    print(figure.layout)
 
     return figure
