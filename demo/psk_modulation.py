@@ -27,6 +27,7 @@ class PSKDemo:
         noise_power_db = self._parameters['noise_power_db']
 
         modulation = komm.PSKModulation(order, amplitude, phase_offset, labeling)
+        modulation._constellation = np.round(modulation._constellation, 12)  # Only for pedagogical reasons
         awgn = komm.AWGNChannel()
         num_symbols = 200*order
         noise_power = 10**(noise_power_db / 10)
