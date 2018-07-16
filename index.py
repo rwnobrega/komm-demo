@@ -11,6 +11,8 @@ app.css.append_css({
     'external_url': 'https://codepen.io/chriddyp/pen/bWLwgP.css'
 })
 
+app.title = 'Komm demo'
+
 with open('app_menu.json') as f:
     app_menu = json.load(f)
 
