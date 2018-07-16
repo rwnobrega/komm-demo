@@ -16,6 +16,9 @@ class PSKDemo:
             self._parameters = kwargs
             self._simulate()
 
+    def __getitem__(self, key):
+        return self._parameters.get(key, None)
+
     def _simulate(self):
         order = 2**self._parameters['log_order']
         amplitude = self._parameters['amplitude']
@@ -65,7 +68,7 @@ layout = html.Div([
             id=uid('log-order-slider'),
             min=1,
             max=4,
-            value=1,
+            value=psk_demo['log_order'],
             marks={i: str(2**i) for i in range(1, 5)},
             step=None,
             updatemode='drag',
@@ -78,7 +81,7 @@ layout = html.Div([
             id=uid('amplitude-slider'),
             min=0.1,
             max=2.0,
-            value=1.0,
+            value=psk_demo['amplitude'],
             marks={0.1: '0.1', 1: '1.0', 2: '2.0'},
             step=0.01,
         ),
@@ -90,7 +93,7 @@ layout = html.Div([
             id=uid('phase-offset-slider'),
             min=-np.pi,
             max=np.pi,
-            value=0.0,
+            value=psk_demo['phase_offset'],
             step=np.pi/16,
         ),
         html.P(
@@ -103,7 +106,7 @@ layout = html.Div([
                 {'label': 'Reflected (Gray)', 'value': 'reflected'},
                 {'label': 'Natural', 'value': 'natural'},
             ],
-            value='reflected',
+            value=psk_demo['labeling'],
             clearable=False,
         ),
         html.P(
@@ -114,7 +117,7 @@ layout = html.Div([
             id=uid('noise-power-db-slider'),
             min=-40.0,
             max=10.0,
-            value=-20.0,
+            value=psk_demo['noise_power_db'],
             marks={-40: '-40', 10: '10'},
             step=0.01,
         )],
