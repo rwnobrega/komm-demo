@@ -1,84 +1,88 @@
 import dash_core_components as dcc
 import dash_html_components as html
-from dash.dependencies import Input, Output
+from dash.dependencies import Input, Output, State
 import plotly.graph_objs as go
 
 import komm
 import numpy as np
 
-from app import app, uid_gen
+from app import app, uid_gen, explode_dict
 
 uid = uid_gen(__name__)
 
 layout = html.Div([
     html.Div(
-        id=uid('graphs'),
+        dcc.Graph(
+            id=uid('constellation-graph'),
+        ),
         style={'width': '78%'},
     ),
 
     html.Div([
-        html.Div([
-            html.P(
-                style={'margin-top': '32px'},
-                id=uid('order-label'),
-            ),
-            dcc.Slider(
-                id=uid('log-order-slider'),
-                min=1,
-                max=4,
-                value=1,
-                marks={i: str(2**i) for i in range(1, 5)},
-                step=None,
-                updatemode='drag',
-            ),
-            html.P(
-                style={'margin-top': '32px'},
-                id=uid('amplitude-label'),
-            ),
-            dcc.Slider(
-                id=uid('amplitude-slider'),
-                min=0.1,
-                max=2.0,
-                value=1.0,
-                marks={0.1: '0.1', 1: '1.0', 2: '2.0'},
-                step=0.01,
-            ),
-            html.P(
-                style={'margin-top': '32px'},
-                id=uid('phase-offset-label'),
-            ),
-            dcc.Slider(
-                id=uid('phase-offset-slider'),
-                min=-np.pi,
-                max=np.pi,
-                value=0.0,
-                step=np.pi/16,
-            ),
-            html.P(
-                'Labeling:',
-                style={'margin-top': '32px'},
-            ),
-            dcc.Dropdown(
-                id=uid('labeling-dropdown'),
-                options=[
-                    {'label': 'Reflected (Gray)', 'value': 'reflected'},
-                    {'label': 'Natural', 'value': 'natural'},
-                ],
-                value='reflected',
-                clearable=False,
-            ),
-            html.P(
-                style={'margin-top': '16px'},
-                id=uid('noise-power-db-label'),
-            ),
-            dcc.Slider(
-                id=uid('noise-power-db-slider'),
-                min=-40.0,
-                max=10.0,
-                value=-40.0,
-                marks={-40: '-40', 10: '10'},
-                step=0.01,
-            )],
+        html.Div(
+            html.Button('Reset axes', id=uid('reset-button')),
+            style={'text-align': 'center'},
+        ),
+        html.P(
+            style={'margin-top': '32px'},
+            id=uid('order-label'),
+        ),
+        dcc.Slider(
+            id=uid('log-order-slider'),
+            min=1,
+            max=4,
+            value=1,
+            marks={i: str(2**i) for i in range(1, 5)},
+            step=None,
+            updatemode='drag',
+        ),
+        html.P(
+            style={'margin-top': '32px'},
+            id=uid('amplitude-label'),
+        ),
+        dcc.Slider(
+            id=uid('amplitude-slider'),
+            min=0.1,
+            max=2.0,
+            value=1.0,
+            marks={0.1: '0.1', 1: '1.0', 2: '2.0'},
+            step=0.01,
+        ),
+        html.P(
+            style={'margin-top': '32px'},
+            id=uid('phase-offset-label'),
+        ),
+        dcc.Slider(
+            id=uid('phase-offset-slider'),
+            min=-np.pi,
+            max=np.pi,
+            value=0.0,
+            step=np.pi/16,
+        ),
+        html.P(
+            'Labeling:',
+            style={'margin-top': '32px'},
+        ),
+        dcc.Dropdown(
+            id=uid('labeling-dropdown'),
+            options=[
+                {'label': 'Reflected (Gray)', 'value': 'reflected'},
+                {'label': 'Natural', 'value': 'natural'},
+            ],
+            value='reflected',
+            clearable=False,
+        ),
+        html.P(
+            style={'margin-top': '16px'},
+            id=uid('noise-power-db-label'),
+        ),
+        dcc.Slider(
+            id=uid('noise-power-db-slider'),
+            min=-40.0,
+            max=10.0,
+            value=-20.0,
+            marks={-40: '-40', 10: '10'},
+            step=0.01,
         )],
 
         style={'width': '20%', 'flex-grow:': '1'},
@@ -126,14 +130,26 @@ def _(noise_power_db):
     return 'Noise power: {:.2f} dB'.format(noise_power_db)
 
 @app.callback(
-    Output(component_id=uid('graphs'), component_property='children'),
+    Output(component_id=uid('constellation-graph'), component_property='relayoutData'),
+    [Input(component_id=uid('reset-button'), component_property='n_clicks')]
+)
+def _(n_clicks):
+    layout=go.Layout(
+        xaxis={'range': (-2.1, 2.1)},
+        yaxis={'range': (-2.1, 2.1)},
+    )
+    return layout
+
+@app.callback(
+    Output(component_id=uid('constellation-graph'), component_property='figure'),
     [Input(component_id=uid('log-order-slider'), component_property='value'),
      Input(component_id=uid('amplitude-slider'), component_property='value'),
      Input(component_id=uid('phase-offset-slider'), component_property='value'),
      Input(component_id=uid('labeling-dropdown'), component_property='value'),
-     Input(component_id=uid('noise-power-db-slider'), component_property='value')]
+     Input(component_id=uid('noise-power-db-slider'), component_property='value'),
+     Input(component_id=uid('constellation-graph'), component_property='relayoutData')]
 )
-def psk_modulation_update(log_order, amplitude, phase_offset, labeling, noise_power_db):
+def psk_modulation_update(log_order, amplitude, phase_offset, labeling, noise_power_db, relayoutData):
     order = 2**log_order
     modulation = komm.PSKModulation(order, amplitude, phase_offset, labeling)
     awgn = komm.AWGNChannel()
@@ -147,49 +163,43 @@ def psk_modulation_update(log_order, amplitude, phase_offset, labeling, noise_po
     sentword = modulation.modulate(bits)
     recvword = awgn(sentword)
 
-    constellation_figure = dcc.Graph(
-        figure=go.Figure(
-            data=[
-                go.Scatter(
-                    name='Gaussian clouds',
-                    x=np.real(recvword),
-                    y=np.imag(recvword),
-                    mode='markers',
-                    marker={'size': 2, 'color': 'rgba(0, 0, 255, 0.33)'},
-                ),
-                go.Scatter(
-                    name='Constellation',
-                    x=np.real(modulation.constellation),
-                    y=np.imag(modulation.constellation),
-                    mode='markers',
-                    marker={'color': 'red'},
-                ),
-                go.Scatter(
-                    name='Labeling',
-                    x=np.real(modulation.constellation),
-                    y=np.imag(modulation.constellation) + 0.25,
-                    mode='text',
-                    text=[''.join(str(b) for b in komm.util.int2binlist(modulation.labeling[i], width=modulation.bits_per_symbol)) for i in range(order)],
-                    textposition='top center',
-                    textfont = {'size': 10},
-                ),
-            ],
-            layout=go.Layout(
-                title=str(modulation),
-                xaxis=dict(
-                    title='Re',
-                    range=[-2.1, 2.1],
-                ),
-                yaxis=dict(
-                    title='Im',
-                    range=[-2.1, 2.1],
-                    scaleanchor = 'x',
-                ),
-                margin={'l': 60, 'b': 60, 't': 80, 'r': 60},
+    figure = go.Figure(
+        data=[
+            go.Scatter(
+                name='Gaussian clouds',
+                x=np.real(recvword),
+                y=np.imag(recvword),
+                mode='markers',
+                marker={'size': 2, 'color': 'rgba(0, 0, 255, 0.33)'},
             ),
-        ),
+            go.Scatter(
+                name='Constellation',
+                x=np.real(modulation.constellation),
+                y=np.imag(modulation.constellation),
+                mode='markers+text',
+                text=[''.join(str(b) for b in komm.util.int2binlist(modulation.labeling[i], width=modulation.bits_per_symbol)) for i in range(order)],
+                textposition='top center',
+                marker={'color': 'red'},
+                textfont = {'size': 10},
+            ),
+        ],
 
-        id=uid('constellation-figure'),
+        layout=go.Layout(
+            title=str(modulation),
+            xaxis=dict(
+                title='Re',
+                range=(-2.1, 2.1),
+            ),
+            yaxis=dict(
+                title='Im',
+                range=(-2.1, 2.1),
+                scaleanchor = 'x',
+            ),
+            margin={'l': 60, 'b': 60, 't': 80, 'r': 60},
+            hovermode='closest',
+        ),
     )
 
-    return [constellation_figure]
+    figure.layout.update(explode_dict(relayoutData))
+
+    return figure
