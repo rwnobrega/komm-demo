@@ -45,7 +45,13 @@ class PSKDemo:
             'gaussian_clouds': recvword,
         }
 
-psk_demo = PSKDemo(log_order=1, amplitude=1.0, phase_offset=0.0, labeling='reflected', noise_power_db=-20.0)
+demo = PSKDemo(
+    log_order=1,
+    amplitude=1.0,
+    phase_offset=0.0,
+    labeling='reflected',
+    noise_power_db=-20.0
+)
 
 
 from app import app, uid_gen
@@ -69,7 +75,7 @@ layout = html.Div([
             id=uid('log-order-slider'),
             min=1,
             max=4,
-            value=psk_demo['log_order'],
+            value=demo['log_order'],
             marks={i: str(2**i) for i in range(1, 5)},
             step=None,
             updatemode='drag',
@@ -82,7 +88,7 @@ layout = html.Div([
             id=uid('amplitude-slider'),
             min=0.1,
             max=2.0,
-            value=psk_demo['amplitude'],
+            value=demo['amplitude'],
             marks={0.1: '0.1', 1: '1.0', 2: '2.0'},
             step=0.01,
         ),
@@ -94,7 +100,7 @@ layout = html.Div([
             id=uid('phase-offset-slider'),
             min=-np.pi,
             max=np.pi,
-            value=psk_demo['phase_offset'],
+            value=demo['phase_offset'],
             step=np.pi/16,
         ),
         html.P(
@@ -107,7 +113,7 @@ layout = html.Div([
                 {'label': 'Reflected (Gray)', 'value': 'reflected'},
                 {'label': 'Natural', 'value': 'natural'},
             ],
-            value=psk_demo['labeling'],
+            value=demo['labeling'],
             clearable=False,
         ),
         html.P(
@@ -118,7 +124,7 @@ layout = html.Div([
             id=uid('noise-power-db-slider'),
             min=-40.0,
             max=10.0,
-            value=psk_demo['noise_power_db'],
+            value=demo['noise_power_db'],
             marks={-40: '-40', 10: '10'},
             step=0.01,
         )],
@@ -178,12 +184,13 @@ def _(noise_power_db):
     [State(component_id=uid('constellation-graph'), component_property='figure')]
 )
 def psk_modulation_update(log_order, amplitude, phase_offset, labeling, noise_power_db, relayoutData, figure):
-    psk_demo.update_parameters(
+    demo.update_parameters(
         log_order=log_order,
         amplitude=amplitude,
         phase_offset=phase_offset,
         labeling=labeling,
-        noise_power_db=noise_power_db)
+        noise_power_db=noise_power_db
+    )
 
     old_layout = figure['layout'] if figure else None
     old_data = figure['data'] if figure else None
@@ -192,10 +199,10 @@ def psk_modulation_update(log_order, amplitude, phase_offset, labeling, noise_po
         data=[
             go.Scatter(
                 name='Constellation',
-                x=np.real(psk_demo.output['constellation']),
-                y=np.imag(psk_demo.output['constellation']),
+                x=np.real(demo.output['constellation']),
+                y=np.imag(demo.output['constellation']),
                 mode='markers+text',
-                text=psk_demo.output['labels'],
+                text=demo.output['labels'],
                 textposition='top center',
                 marker={'color': 'red'},
                 textfont = {'size': 10},
@@ -203,8 +210,8 @@ def psk_modulation_update(log_order, amplitude, phase_offset, labeling, noise_po
             ),
             go.Scatter(
                 name='Gaussian clouds',
-                x=np.real(psk_demo.output['gaussian_clouds']),
-                y=np.imag(psk_demo.output['gaussian_clouds']),
+                x=np.real(demo.output['gaussian_clouds']),
+                y=np.imag(demo.output['gaussian_clouds']),
                 mode='markers',
                 marker={'size': 2, 'color': 'rgba(0, 0, 255, 0.2)'},
                 visible='legendonly',
@@ -212,7 +219,6 @@ def psk_modulation_update(log_order, amplitude, phase_offset, labeling, noise_po
         ],
 
         layout=go.Layout(
-            title=psk_demo.output['title'],
             xaxis=dict(
                 title='Re',
                 range=(-2.1, 2.1),
@@ -228,6 +234,8 @@ def psk_modulation_update(log_order, amplitude, phase_offset, labeling, noise_po
 
     if old_layout:
         figure['layout'] = old_layout
+
+    figure['layout']['title'] = demo.output['title']
 
     for axis in ['xaxis', 'yaxis']:
         if figure['layout'][axis]['autorange']:
