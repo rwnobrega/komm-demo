@@ -6,7 +6,45 @@ import plotly.graph_objs as go
 import komm
 import numpy as np
 
-from app import app, uid_gen, explode_dict
+class PSKDemo:
+    def __init__(self, **kwargs):
+        self._parameters = kwargs
+        self._simulate()
+
+    def update_parameters(self, **kwargs):
+        if kwargs != self._parameters:
+            self._parameters = kwargs
+            self._simulate()
+
+    def _simulate(self):
+        order = 2**self._parameters['log_order']
+        amplitude = self._parameters['amplitude']
+        phase_offset = self._parameters['phase_offset']
+        labeling = self._parameters['labeling']
+        noise_power_db = self._parameters['noise_power_db']
+
+        modulation = komm.PSKModulation(order, amplitude, phase_offset, labeling)
+        awgn = komm.AWGNChannel()
+        num_symbols = 200*order
+        noise_power = 10**(noise_power_db / 10)
+        awgn.signal_power = modulation.energy_per_symbol
+        awgn.snr = awgn.signal_power / noise_power
+        num_bits = modulation.bits_per_symbol * num_symbols
+        bits = np.random.randint(2, size=num_bits)
+        sentword = modulation.modulate(bits)
+        recvword = awgn(sentword)
+
+        self.output = {
+            'title': str(modulation),
+            'constellation': modulation.constellation,
+            'labels': [''.join(str(b) for b in komm.util.int2binlist(modulation.labeling[i], width=modulation.bits_per_symbol)) for i in range(order)],
+            'gaussian_clouds': recvword,
+        }
+
+psk_demo = PSKDemo(log_order=1, amplitude=1.0, phase_offset=0.0, labeling='reflected', noise_power_db=-20.0)
+
+
+from app import app, uid_gen
 
 uid = uid_gen(__name__)
 
@@ -132,37 +170,34 @@ def _(noise_power_db):
      Input(component_id=uid('phase-offset-slider'), component_property='value'),
      Input(component_id=uid('labeling-dropdown'), component_property='value'),
      Input(component_id=uid('noise-power-db-slider'), component_property='value'),
-     Input(component_id=uid('constellation-graph'), component_property='relayoutData')]
+     Input(component_id=uid('constellation-graph'), component_property='relayoutData')],
+    [State(component_id=uid('constellation-graph'), component_property='figure')]
 )
-def psk_modulation_update(log_order, amplitude, phase_offset, labeling, noise_power_db, relayoutData):
-    order = 2**log_order
-    modulation = komm.PSKModulation(order, amplitude, phase_offset, labeling)
-    awgn = komm.AWGNChannel()
+def psk_modulation_update(log_order, amplitude, phase_offset, labeling, noise_power_db, relayoutData, figure):
+    psk_demo.update_parameters(
+        log_order=log_order,
+        amplitude=amplitude,
+        phase_offset=phase_offset,
+        labeling=labeling,
+        noise_power_db=noise_power_db)
 
-    num_symbols = 200*order
-    noise_power = 10**(noise_power_db / 10)
-    awgn.signal_power = modulation.energy_per_symbol
-    awgn.snr = awgn.signal_power / noise_power
-    num_bits = modulation.bits_per_symbol * num_symbols
-    bits = np.random.randint(2, size=num_bits)
-    sentword = modulation.modulate(bits)
-    recvword = awgn(sentword)
+    old_layout = figure['layout'] if figure else None
 
     figure = go.Figure(
         data=[
             go.Scatter(
                 name='Gaussian clouds',
-                x=np.real(recvword),
-                y=np.imag(recvword),
+                x=np.real(psk_demo.output['gaussian_clouds']),
+                y=np.imag(psk_demo.output['gaussian_clouds']),
                 mode='markers',
                 marker={'size': 2, 'color': 'rgba(0, 0, 255, 0.33)'},
             ),
             go.Scatter(
                 name='Constellation',
-                x=np.real(modulation.constellation),
-                y=np.imag(modulation.constellation),
+                x=np.real(psk_demo.output['constellation']),
+                y=np.imag(psk_demo.output['constellation']),
                 mode='markers+text',
-                text=[''.join(str(b) for b in komm.util.int2binlist(modulation.labeling[i], width=modulation.bits_per_symbol)) for i in range(order)],
+                text=psk_demo.output['labels'],
                 textposition='top center',
                 marker={'color': 'red'},
                 textfont = {'size': 10},
@@ -170,7 +205,7 @@ def psk_modulation_update(log_order, amplitude, phase_offset, labeling, noise_po
         ],
 
         layout=go.Layout(
-            title=str(modulation),
+            title=psk_demo.output['title'],
             xaxis=dict(
                 title='Re',
                 range=(-2.1, 2.1),
@@ -185,14 +220,12 @@ def psk_modulation_update(log_order, amplitude, phase_offset, labeling, noise_po
         ),
     )
 
-    relayoutData = explode_dict(relayoutData)
+    if old_layout:
+        figure['layout'] = old_layout
 
-    if relayoutData.get('xaxis', {}).pop('autorange', False):
-        relayoutData['xaxis']['range'] = (-2.1, 2.1)
-
-    if relayoutData.get('yaxis', {}).pop('autorange', False):
-        relayoutData['yaxis']['range'] = (-2.1, 2.1)
-
-    figure.layout.update(relayoutData)
+    for axis in ['xaxis', 'yaxis']:
+        if figure['layout'][axis]['autorange']:
+            figure['layout'][axis]['autorange'] = False
+            figure['layout'][axis]['range'] = (-2.1, 2.1)
 
     return figure
