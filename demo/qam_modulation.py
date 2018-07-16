@@ -212,17 +212,21 @@ def _(square_checklist):
 )
 def _(log_order_0, log_order_1, square_checklist):
     if square_checklist == ['Square']:
-        return 'Orders: {}'.format(4**log_order_0)
+        return 'Order: {}'.format(4**log_order_0)
     else:
         return 'Orders: ({}, {})'.format(2**log_order_0, 2**log_order_1)
 
 @app.callback(
     Output(component_id=uid('base-amplitudes-label'), component_property='children'),
     [Input(component_id=uid('base-amplitude-0-slider'), component_property='value'),
-     Input(component_id=uid('base-amplitude-1-slider'), component_property='value')]
+     Input(component_id=uid('base-amplitude-1-slider'), component_property='value'),
+     Input(component_id=uid('square-checklist'), component_property='values')]
 )
-def _(base_amplitude_0, base_amplitude_1):
-    return 'Base amplitudes: ({:.2f}, {:.2f})'.format(base_amplitude_0, base_amplitude_1)
+def _(base_amplitude_0, base_amplitude_1, square_checklist):
+    if square_checklist == ['Square']:
+        return 'Base amplitude: {:.2f}'.format(base_amplitude_0)
+    else:
+        return 'Base amplitudes: ({:.2f}, {:.2f})'.format(base_amplitude_0, base_amplitude_1)
 
 @app.callback(
     Output(component_id=uid('phase-offset-label'), component_property='children'),
