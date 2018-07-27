@@ -47,7 +47,7 @@ class QAMDemo:
         self.output = {
             'title': str(modulation),
             'constellation': modulation.constellation,
-            'labels': [''.join(str(b) for b in komm.util.int2binlist(modulation.labeling[i], width=modulation.bits_per_symbol)) for i in range(order)],
+            'labels': [''.join(str(b) for b in komm.int2binlist(modulation.labeling[i], width=modulation.bits_per_symbol)) for i in range(order)],
             'gaussian_clouds': recvword,
         }
 
