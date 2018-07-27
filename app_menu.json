@@ -39,7 +39,11 @@
         "menu_name": "QAM modulation",
         "title": "Quadrature amplitude modulation (QAM)",
         "doc": "http://komm.readthedocs.io/en/latest/komm.QAModulation/"
+    },
+
+    "uniform_quantization": {
+        "menu_name": "Uniform quantization",
+        "title": "Uniform quantization",
+        "doc": "http://komm.readthedocs.io/en/latest/komm.UniformQuantizer/"
     }
-
-
 }
