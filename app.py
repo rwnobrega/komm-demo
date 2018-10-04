@@ -1,5 +1,4 @@
 import dash
-import re
 
 app = dash.Dash()
 server = app.server
